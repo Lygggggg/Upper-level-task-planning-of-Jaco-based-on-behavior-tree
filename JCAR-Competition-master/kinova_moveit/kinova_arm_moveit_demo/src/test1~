@@ -1,0 +1,539 @@
+#include "ros/ros.h"
+
+#include<iostream> //C++标准输入输出库 
+#include <vector>
+#include "std_msgs/String.h"
+#include "geometry_msgs/PoseStamped.h"
+#include <kinova_msgs/ArmPoseActionGoal.h> // 注意格式源文件名字为ArmPose.action
+#include <ros/ros.h>
+#include <kinova_driver/kinova_ros_types.h>
+
+#include <actionlib/client/simple_action_client.h>
+#include <kinova_msgs/SetFingersPositionAction.h>
+#include <kinova_msgs/ArmPoseAction.h>
+#include <kinova_msgs/HomeArm.h>
+#include <kinova_msgs/ArmJointAnglesAction.h>
+
+const int FINGER_MAX1 = 6714;
+const int FINGER_MAX2 = 6924;
+const int FINGER_MAX3 = 7332;
+
+
+bool cartesian_pose_client(double x, double y, double z, double qx, double qy, double qz, double qw)//四元数
+{
+
+
+    actionlib::SimpleActionClient <kinova_msgs::ArmPoseAction> *client = new actionlib::SimpleActionClient<kinova_msgs::ArmPoseAction>(
+            "/j2n6s300_driver/pose_action/tool_pose");//取的主题
+
+    client->waitForServer();
+
+    kinova_msgs::ArmPoseGoal pose_goal;//注意形式ArmPose.action
+    pose_goal.pose.header.frame_id = "j2n6s300_link_base";
+
+    pose_goal.pose.pose.position.x = x;
+    pose_goal.pose.pose.position.y = y;
+    pose_goal.pose.pose.position.z = z;
+
+    pose_goal.pose.pose.orientation.x = qx;
+    pose_goal.pose.pose.orientation.y = qy;
+    pose_goal.pose.pose.orientation.z = qz;
+    pose_goal.pose.pose.orientation.w = qw;
+
+
+    client->sendGoal(pose_goal);
+
+
+    if (client->waitForResult(ros::Duration(200.0)))//延时得高机械臂不会发送，只能自己检测坐标，奇异值也不会告诉所有信息都通过主题反馈
+    {
+        client->getResult();
+        return true;
+    } else {
+        client->cancelAllGoals();
+        ROS_WARN_STREAM("The gripper action timed-out");
+        return false;
+    }
+
+}
+
+bool finger_control_client(float finger1, float finger2, float finger3)//0-1
+{
+
+
+    actionlib::SimpleActionClient <kinova_msgs::SetFingersPositionAction> *finger_client = new actionlib::SimpleActionClient<kinova_msgs::SetFingersPositionAction>(
+            "j2n6s300_driver/fingers_action/finger_positions");
+
+    finger_client->waitForServer();
+
+    kinova_msgs::SetFingersPositionGoal finger_goal;
+
+    finger_goal.fingers.finger1 = finger1 * FINGER_MAX1;
+    finger_goal.fingers.finger2 = finger2 * FINGER_MAX2;
+    finger_goal.fingers.finger3 = finger3 * FINGER_MAX3;
+
+
+    finger_client->sendGoal(finger_goal);
+
+
+    if (finger_client->waitForResult(ros::Duration(150.0))) {
+        finger_client->getResult();
+        return true;
+    } else {
+        finger_client->cancelAllGoals();
+        ROS_WARN_STREAM("The gripper action timed-out");
+        return false;
+    }
+
+}
+
+int main(int argc, char **argv) {
+
+
+    ros::init(argc, argv, "paragram1");
+    ros::NodeHandle node_handle;
+
+    ros::ServiceClient start_to_home = node_handle.serviceClient<kinova_msgs::HomeArm>("j2n6s300_driver/in/home_arm");
+
+    kinova_msgs::HomeArm srv;
+
+    try {
+
+        start_to_home.call(srv);
+        ROS_INFO("go to home");
+
+    }
+    catch (ros::Exception) {
+        ROS_INFO("Failed to HOme.");
+    }
+//    double Tf_Mat[4][4];
+
+
+
+//    const double tf[16] = {0.9998, -0.0143, 0.0161, -0.002768, -0.0149, -0.9991, 0.0402, -0.56808, 0.0155, -0.0404, -0.9991, 1.09819, 0, 0, 0, 1};
+//    for (int i = 0; i < 4; ++i) {
+//        for (int j = 0; j < 4; ++j) {
+//            Tf_Mat[i][j] = tf[i*4+j];
+
+//        }
+//    }
+//    ROS_INFO("TF_mat is %f , %f, %f", Tf_Mat[0][3],Tf_Mat[1][2],Tf_Mat[2][0]);
+    double x, y, z, qx, qy, qz, qw; /*p[4], pm[4] = {-0.07286, -0.091444, 0.5683, 1};*///, joint1, joint2, joint3, joint4, joint5, joint6;
+//    ROS_INFO("the marker pose with pm position(x,y,z) is %f , %f, %f", pm[0], pm[1], pm[2]);
+
+    float finger1,finger2,finger3;
+
+
+//    for (int i = 0; i < 4; ++i) {
+//        p[i] = Tf_Mat[i][0]*pm[0]+Tf_Mat[i][1]*pm[1]+Tf_Mat[i][2]*pm[2]+Tf_Mat[i][3]*pm[3];
+//    }
+
+ /*
+  * zhua qu bei zi
+  */
+
+    double p[3] = {-0.14919, -0.3655, 0.01362};
+    x=-0.14919;
+    y=-0.3655;//y可能需要补偿4cm y的原值为-0.528081440518
+    z=0.01362+0.2;
+    qx=-0.9959;
+    qy=-0.0295;
+    qz=-0.06;
+    qw=0.05955;
+
+
+    finger1 = finger2 = 0;
+    finger3 = 0;
+   
+   ROS_INFO("Final xyz is %f , %f, %f", x,y,z);
+
+try{
+
+    bool result=cartesian_pose_client(x,y,z,qx,qy,qz,qw);
+    if(result)
+    {
+      bool finger_re= finger_control_client(finger1,finger2,finger3);
+      ROS_INFO("Cartesian pose sent!.");
+if(finger_re)ROS_INFO("finger move!.");
+    }
+}
+catch(ros::Exception)
+     {
+
+      ROS_INFO("program interrupted before completion.");
+     }
+
+
+   /*
+    * jiazhu beizi
+    */
+
+    x=p[0];
+    y=p[1];//y可能需要补偿4cm y的原值为-0.528081440518
+    z=p[2];
+    qx=-0.9959;
+    qy=-0.0295;
+    qz=-0.06;
+    qw=0.05955;
+
+    finger1 = finger2 = 1;
+    finger3 = 0;
+   
+   ROS_INFO("Final xyz is %f , %f, %f", x,y,z);
+
+try{
+
+    bool result=cartesian_pose_client(x,y,z,qx,qy,qz,qw);
+    if(result)
+    {
+      bool finger_re= finger_control_client(finger1,finger2,finger3);
+      ROS_INFO("Cartesian pose sent!.");
+if(finger_re)ROS_INFO("finger move!.");
+    }
+}
+catch(ros::Exception)
+     {
+
+      ROS_INFO("program interrupted before completion.");
+     }
+
+
+   /*
+    * yidong dao die zi shangfang
+    */
+    x=0.20618;
+    y=-0.4486;//y可能需要补偿4cm y的原值为-0.528081440518
+    z=0.020756+0.1;
+    qx=-0.9059;
+    qy=-0.41956;
+    qz=-0.0513;
+    qw=0.024217;
+
+
+
+   ROS_INFO("Final xyz is %f , %f, %f", x,y,z);
+
+try{
+
+    bool result=cartesian_pose_client(x,y,z,qx,qy,qz,qw);
+    if(result)
+    {
+      ROS_INFO("Cartesian pose sent!.");
+    }
+}
+catch(ros::Exception)
+     {
+
+      ROS_INFO("program interrupted before completion.");
+     }
+
+
+
+    /*
+     *put cup on the plate
+     */
+     x=0.20618;
+     y=-0.4486;//y可能需要补偿4cm y的原值为-0.528081440518
+     z=0.020756;
+     qx=-0.9059;
+     qy=-0.41956;
+     qz=-0.0513;
+     qw=0.024217;
+
+     finger1 = finger2 = 0;
+     finger3 = 0;
+
+    ROS_INFO("Final xyz is %f , %f, %f", x,y,z);
+
+ try{
+
+     bool result=cartesian_pose_client(x,y,z,qx,qy,qz,qw);
+     if(result)
+     {
+       bool finger_re= finger_control_client(finger1,finger2,finger3);
+       ROS_INFO("Cartesian pose sent!.");
+ if(finger_re)ROS_INFO("finger move!.");
+     }
+ }
+ catch(ros::Exception)
+      {
+
+       ROS_INFO("program interrupted before completion.");
+      }
+
+     /*
+      *抬高手抓并且轻微闭合双指
+      */
+
+      x=0.20618;
+      y=-0.4486;//y可能需要补偿4cm y的原值为-0.528081440518
+      z=0.020756+0.2;
+      qx=-0.9059;
+      qy=-0.41956;
+      qz=-0.0513;
+      qw=0.024217;
+
+      finger1 = 0.73279;
+      finger2 = 0.63;
+      finger3 = 0;
+
+     ROS_INFO("Final xyz is %f , %f, %f", x,y,z);
+
+  try{
+
+      bool result=cartesian_pose_client(x,y,z,qx,qy,qz,qw);
+      if(result)
+      {
+        bool finger_re= finger_control_client(finger1,finger2,finger3);
+        ROS_INFO("Cartesian pose sent!.");
+  if(finger_re)ROS_INFO("finger move!.");
+      }
+  }
+  catch(ros::Exception)
+       {
+
+        ROS_INFO("program interrupted before completion.");
+       }
+
+      /*
+       * 移动到待定位置准备抓取碟子
+       */
+
+       x=0.098768;
+       y=-0.47316;//y可能需要补偿4cm y的原值为-0.528081440518
+       z=-0.0153;
+       qx=0.0673;
+       qy=0.84026;
+       qz=0.011;
+       qw=0.537868;
+
+
+      ROS_INFO("Final xyz is %f , %f, %f", x,y,z);
+
+   try{
+
+       bool result=cartesian_pose_client(x,y,z,qx,qy,qz,qw);
+       if(result)
+       {
+         ROS_INFO("Cartesian pose sent!.");
+       }
+   }
+   catch(ros::Exception)
+        {
+
+         ROS_INFO("program interrupted before completion.");
+        }
+
+       /*
+        * 插到盘子底部
+        */
+
+        x=0.1286;
+        y=-0.474747;//y可能需要补偿4cm y的原值为-0.528081440518
+        z=-0.01588;
+        qx=0.04118;
+        qy=0.8429;
+        qz=0.02414;
+        qw=0.53594;
+
+
+        finger1 = 1;
+        finger2 = 1;
+        finger3 = 0;
+       ROS_INFO("Final xyz is %f , %f, %f", x,y,z);
+
+    try{
+
+        bool result=cartesian_pose_client(x,y,z,qx,qy,qz,qw);
+        if(result)
+        {
+          ros::Duration(5).sleep();
+
+          ROS_INFO("Sleep 5s!.");
+
+          bool finger_re= finger_control_client(finger1,finger2,finger3);
+
+          ROS_INFO("Cartesian pose sent!.");
+          if(finger_re)ROS_INFO("finger move!.");
+
+        }
+
+    }
+    catch(ros::Exception)
+         {
+
+          ROS_INFO("program interrupted before completion.");
+         }
+
+
+        /*
+         * 略微提高盘子
+         */
+
+        x=0.1286;
+        y=-0.474747;//y可能需要补偿4cm y的原值为-0.528081440518
+        z=-0.010698;
+        qx=0.04118;
+        qy=0.8429;
+        qz=0.02414;
+        qw=0.53594;
+
+
+
+        ROS_INFO("Final xyz is %f , %f, %f", x,y,z);
+
+     try{
+
+         bool result=cartesian_pose_client(x,y,z,qx,qy,qz,qw);
+         if(result)
+         {
+           ROS_INFO("Cartesian pose sent!.");
+         }
+     }
+     catch(ros::Exception)
+          {
+
+           ROS_INFO("program interrupted before completion.");
+          }
+
+         /*
+          * 翘起手腕
+          */
+
+         x=0.1313;
+         y=-0.4735;//y可能需要补偿4cm y的原值为-0.528081440518
+         z=-0.0034;
+         qx=0.08016;
+         qy=0.76014;
+         qz=-0.0528;
+         qw=0.6426;
+
+
+
+         ROS_INFO("Final xyz is %f , %f, %f", x,y,z);
+
+      try{
+
+          bool result=cartesian_pose_client(x,y,z,qx,qy,qz,qw);
+          if(result)
+          {
+            ROS_INFO("Cartesian pose sent!.");
+          }
+      }
+      catch(ros::Exception)
+           {
+
+            ROS_INFO("program interrupted before completion.");
+           }
+
+
+          /*
+           * 移动到目标位置上方
+           */
+
+          x=-0.21857;
+          y=-0.30814;//y可能需要补偿4cm y的原值为-0.528081440518
+          z=0.024688;
+          qx=0.39678;
+          qy=0.65087;
+          qz=-0.32664;
+          qw=0.55877;
+
+
+
+          ROS_INFO("Final xyz is %f , %f, %f", x,y,z);
+
+       try{
+
+           bool result=cartesian_pose_client(x,y,z,qx,qy,qz,qw);
+           if(result)
+           {
+             ROS_INFO("Cartesian pose sent!.");
+           }
+       }
+       catch(ros::Exception)
+            {
+
+             ROS_INFO("program interrupted before completion.");
+            }
+
+           /*
+            * kaizhua
+            */
+
+            x=-0.21664;
+            y=-0.3057;//能需要补偿4cm y的原值为-0.528081440518
+            z=-0.0099;
+            qx=0.433;
+            qy=0.7418;
+            qz=-0.2441;
+            qw=0.45;
+
+            finger1 = 0.459;
+            finger2 = 0;
+            finger3 = 0;
+           ROS_INFO("Final xyz is %f , %f, %f", x,y,z);
+
+        try{
+
+            bool result=cartesian_pose_client(x,y,z,qx,qy,qz,qw);
+            if(result)
+            {
+              bool finger_re= finger_control_client(finger1,finger2,finger3);
+              ROS_INFO("Cartesian pose sent!.");
+        if(finger_re)ROS_INFO("finger move!.");
+            }
+        }
+        catch(ros::Exception)
+             {
+
+              ROS_INFO("program interrupted before completion.");
+             }
+
+
+
+            /*
+             * 移动sui ji weizhi
+             */
+
+            x=-0.21857-0.05;
+            y=-0.30814;//y可能需要补偿4cm y的原值为-0.528081440518
+            z=0.224688;
+            qx=0.39678;
+            qy=0.65087;
+            qz=-0.32664;
+            qw=0.55877;
+
+
+
+            ROS_INFO("Final xyz is %f , %f, %f", x,y,z);
+
+         try{
+
+             bool result=cartesian_pose_client(x,y,z,qx,qy,qz,qw);
+             if(result)
+             {
+               ROS_INFO("Cartesian pose sent!.");
+             }
+         }
+         catch(ros::Exception)
+              {
+
+               ROS_INFO("program interrupted before completion.");
+              }
+
+
+             try {
+
+                 start_to_home.call(srv);
+                 ROS_INFO("go to home");
+
+             }
+             catch (ros::Exception) {
+                 ROS_INFO("Failed to HOme.");
+             }
+
+                 return 0;
+
+}
+
+

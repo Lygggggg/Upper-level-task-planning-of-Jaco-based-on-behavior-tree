@@ -1,0 +1,84 @@
+<?xml version='1.0'?>
+<sdf version='1.4'>
+  <model name="cube_aruco">
+    <static>false</static>
+    <link name="link">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>0.07</mass>
+        <inertia>
+          <ixx>0.000010</ixx>
+          <iyy>0.000010</iyy>
+          <izz>0.000010</izz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+  	        <scale>0.01 0.01 0.01</scale>
+            <uri>model://cube_aruco/meshes/cube.dae</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>500</mu>
+              <mu2>500</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <max_vel>0.1</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+      
+
+     <!--<visual name="visual">
+        <geometry>
+          <mesh>
+  	        <scale>0.01 0.01 0.01</scale>
+            <uri>model://cube_aruco/meshes/cube.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/WoodTile</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material> 
+      </visual> --> 
+
+
+    </link> 
+	 <!--picture_link-->
+    <joint type="fixed" name="link1joint">
+      <pose>0 0 0 0 0 0</pose>
+      <child>link1</child>
+      <parent>link</parent>
+    </joint>
+
+    <static>false</static>
+    <link name="link1">
+        <!--<pose>0.5 0.044 -0.062 0 0 0</pose> -->
+	<pose>0 0 0 0 0 0</pose>
+            <visual name="visual">
+               <pose>0 0 0 0 0 0</pose>
+              <geometry>
+                <box>
+                  <size>0.05 0.05 0.05</size>
+                </box>
+              </geometry>
+              <material>
+               <script>
+                  <uri>model://cube_aruco/materials/scripts</uri>
+                  <uri>model://cube_aruco/materials/textures</uri>
+                   <name>cube_aruco/Diffuse</name>
+               </script>
+               </material>
+           </visual>
+     </link> 
+  </model>
+</sdf>

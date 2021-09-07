@@ -1,0 +1,6 @@
+<launch>
+    <param name="camera_link" type="string" value="odom_combined" />
+    <param name="octomap_resolution" type="double" value="0.025" />
+    <param name="max_range" type="double"  value="5.0" />
+    <rosparam command="load" file="$(find j2n6s300_moveit_config)/config/sensors_3d.yaml" />
+</launch>

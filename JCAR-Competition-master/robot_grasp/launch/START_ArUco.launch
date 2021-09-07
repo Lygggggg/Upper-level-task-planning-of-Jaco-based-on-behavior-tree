@@ -1,0 +1,70 @@
+<launch>
+    <arg name="namespace_prefix" default="jaco_kinect_handeyecalibration" />
+    <arg name="marker_size" doc="Size of the ArUco marker used, in meters" default="0.05" />
+    <arg name="marker_id" doc="The ID of the ArUco marker used" default="100" />
+    <arg name="corner_refinement" default="LINES" /> <!-- NONE, HARRIS, LINES, SUBPIX -->
+
+    <!-- start the Kinect >
+    <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch" >
+    </include-->
+
+    <!-- start ArUco -->
+    <node name="aruco_tracker" pkg="aruco_ros" type="single">
+
+        <remap from="/camera_info" to="/kinect2/hd/camera_info" />
+        <remap from="/image" to="/kinect2/hd/image_color_rect" />
+
+        <param name="image_is_rectified" value="true"/>
+        <param name="marker_size"        value="$(arg marker_size)"/>
+        <param name="marker_id"          value="$(arg marker_id)"/>
+        <param name="reference_frame"    value="kinect2_rgb_optical_frame"/>
+        <param name="camera_frame"       value="kinect2_rgb_optical_frame"/>
+        <param name="marker_frame"       value="camera_marker" />
+        <param name="corner_refinement"  value="$(arg corner_refinement)" />
+    </node>
+
+
+  <param name="robot_type" value="j2n6s300" />
+  <param name="robot_connected" value="false" />
+  <param name="/pick_place_demo/arm/solve_type" value="Manipulation2" />
+  <param name="/pick_place_demo/arm/kinematics_solver_timeout" value="0.05" />
+
+  <!-- By default, we do not start a database (it can be large) -->
+  <arg name="db" default="false" />
+  <!-- Allow user to specify database location -->
+  <arg name="db_path" default="$(find j2n6s300_moveit_config)/default_warehouse_mongo_db" />
+
+  <!-- By default, we are not in debug mode -->
+  <arg name="debug" default="false" />
+
+  <!-- Load the URDF, SRDF and other .yaml configuration files on the param server -->
+  <include file="$(find j2n6s300_moveit_config)/launch/planning_context.launch">
+    <arg name="load_robot_description" value="true"/>
+  </include>
+
+  <!-- Run the main MoveIt executable without trajectory execution (we do not have controllers configured by default) -->
+  <include file="$(find j2n6s300_moveit_config)/launch/move_group_j2n6s300.launch">
+    <arg name="allow_trajectory_execution" value="true"/>
+    <arg name="fake_execution" value="false"/>
+    <arg name="info" value="true"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="joint_states_ns" value="/j2n6s300/joint_states"/>
+    <arg name="controller_manager" value="j2n6s300_ros_control"/>
+  </include>
+
+  <!-- ros-control Controller parameters-->
+  <rosparam file="$(find j2n6s300_moveit_config)/config/controllers_ros_control.yaml"/>
+
+  <!-- Run Rviz and load the default config to see the state of the move_group node -->
+  <include file="$(find j2n6s300_moveit_config)/launch/moveit_rviz.launch">
+    <arg name="config" value="true"/>
+    <arg name="debug" value="$(arg debug)"/>
+  </include>
+
+  <!-- If database loading was enabled, start mongodb as well-->
+  <include file="$(find j2n6s300_moveit_config)/launch/default_warehouse_db.launch" if="$(arg db)">
+    <arg name="moveit_warehouse_database_path" value="$(arg db_path)"/>
+  </include>
+
+
+</launch>
