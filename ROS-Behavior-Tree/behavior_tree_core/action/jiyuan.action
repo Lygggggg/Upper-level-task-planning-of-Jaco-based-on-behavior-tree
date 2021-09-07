@@ -1,0 +1,10 @@
+#goal definition
+int32 x
+int32 y
+int32 z
+---
+#result
+int32 res
+---
+#feedback
+int32 fdbk

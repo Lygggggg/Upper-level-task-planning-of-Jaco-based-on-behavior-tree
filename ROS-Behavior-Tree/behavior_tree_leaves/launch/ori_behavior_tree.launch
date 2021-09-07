@@ -1,0 +1,11 @@
+<launch>
+	<!-- <node name="get_jiyuan" pkg="behavior_tree_leaves" type="get_jiyuan.py" />  -->
+    <!--启动行为树节点  node name  要对应 type所指文件的节点名-->
+    <node name="condition" pkg="behavior_tree_leaves" type="condition_sub.py" output="screen"/> 
+
+    <node name="action" pkg="behavior_tree_leaves" type="action_pub.py" output="screen"/>
+    
+
+    <!--启动行为树  这里的 node name -->
+    <node name="ori_behavior_tree" pkg="behavior_tree_core" type="ori_behavior_tree" output="screen"/>
+</launch>

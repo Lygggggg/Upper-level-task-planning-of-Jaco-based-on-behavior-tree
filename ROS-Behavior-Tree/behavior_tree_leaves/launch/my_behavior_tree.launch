@@ -1,0 +1,22 @@
+<launch>
+	<!-- <node name="get_jiyuan" pkg="behavior_tree_leaves" type="get_jiyuan.py" />  -->
+    <!--启动行为树节点   node name  要对应 type所指文件的节点名 -->
+    <node name="condition0" pkg="behavior_tree_leaves" type="condition0.py" output="screen"/>
+        <node name="condition1" pkg="behavior_tree_leaves" type="condition1.py" output="screen"/>
+        <node name="condition2" pkg="behavior_tree_leaves" type="condition2.py" output="screen"/>
+        <node name="condition3" pkg="behavior_tree_leaves" type="condition3.py" output="screen"/>
+        <node name="condition4" pkg="behavior_tree_leaves" type="condition4.py" output="screen"/>
+        <node name="condition5" pkg="behavior_tree_leaves" type="condition5.py" output="screen"/>
+        <node name="condition6" pkg="behavior_tree_leaves" type="condition6.py" output="screen"/>
+
+    <node name="action0" pkg="behavior_tree_leaves" type="action0.py" output="screen"/>
+    <node name="action1" pkg="behavior_tree_leaves" type="action1.py" output="screen"/>
+    <node name="action2" pkg="behavior_tree_leaves" type="action2.py" output="screen"/>
+    <node name="action3" pkg="behavior_tree_leaves" type="action3.py" output="screen"/>
+    <node name="action4" pkg="behavior_tree_leaves" type="action4.py" output="screen"/>
+    <node name="action5" pkg="behavior_tree_leaves" type="action5.py" output="screen"/>
+    <node name="action6" pkg="behavior_tree_leaves" type="action6.py" output="screen"/>
+
+    <!--启动行为树  这里的 node name -->
+    <node name="my_behavior_tree" pkg="behavior_tree_core" type="my_behavior_tree" output="screen"/>
+</launch>

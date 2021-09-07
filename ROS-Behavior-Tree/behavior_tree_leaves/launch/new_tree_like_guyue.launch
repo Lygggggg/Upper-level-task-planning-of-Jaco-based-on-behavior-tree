@@ -1,0 +1,14 @@
+<launch>
+    <!--启动行为树节点  node name  要对应 type所指文件的节点名-->
+    <node name="have_object" pkg="behavior_tree_leaves" type="have_object.py"/>
+    <node name="close_gripper" pkg="behavior_tree_leaves" type="close_gripper" output="screen"/>
+    <node name="pick_obj" pkg="behavior_tree_leaves" type="pick_obj"/>
+    <node name="if_release" pkg="behavior_tree_leaves" type="if_release"/>
+    <node name="place_obj" pkg="behavior_tree_leaves" type="place_obj" output="screen"/>
+    <node name="open_gripper" pkg="behavior_tree_leaves" type="open_gripper" output="screen"/>
+    <node name="go_home" pkg="behavior_tree_leaves" type="go_home" output="screen"/>
+
+
+    <!--启动行为树  这里的 node name -->
+    <node name="new_tree_like_guyue" pkg="behavior_tree_core" type="new_tree_like_guyue" output="screen"/>
+</launch>
