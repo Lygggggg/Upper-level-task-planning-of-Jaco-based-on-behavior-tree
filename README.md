@@ -21,7 +21,7 @@ This repository is a Kinova Jaco2 robot arm upper-level task planning **Simulati
 This project was developed based on ROS Melodic under Ubuntu 18.04, and the simulation environment was improved based on [@freeman-1995](https://github.com/freeman-1995) project [JCAR-Competition](https://github.com/freeman-1995/JCAR-Competition).
 Based on his project, the Kinova Jaco v3 robot arm model was replaced with the Kinova Jaco v2 model.
 
-![simulation](C:\Users\L\Pictures\Saved Pictures\152803.png)
+![simulation1](C:\Users\L\Pictures\Saved Pictures\152803.png)
 
 ### Environment
 
@@ -81,7 +81,7 @@ roslaunch robot_grasp START_Gazebo.launch
 ```sh
 roslaunch robot_grasp START_Moveit.launch
 ```
-![simulation](C:\Users\L\Pictures\Saved Pictures\2.png)
+![simulation2](C:\Users\L\Pictures\Saved Pictures\2.png)
 
 3. Load the object to be grabbed into the Gazebo simulation environment.
 ```sh
