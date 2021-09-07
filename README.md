@@ -111,5 +111,5 @@ roslaunch behavior_tree_leaves new_tree_like_guyue.launch
 
 Simulation experiment video.
 
-[![Watch the video](C:\Users\L\Pictures\Saved Pictures\164832.png)](https://www.youtube.com/watch?v=Scji1yu_w7I)
+[![Watch the video](https://github.com/Lygggggg/Upper-level-task-planning-of-Jaco-based-on-behavior-tree/tree/main/pic/164832.png)](https://www.youtube.com/watch?v=Scji1yu_w7I)
 
