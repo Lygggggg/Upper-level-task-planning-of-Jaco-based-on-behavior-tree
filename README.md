@@ -11,6 +11,8 @@ Use behavior tree and DMP for upper-level task planning.
   - [Step3](#step3)  
 - [Usage](#usage)
 - [Result](#result)
+- [Contributing](#contributing)
+
 
 ## Background
 
@@ -21,7 +23,7 @@ This repository is a Kinova Jaco2 robot arm upper-level task planning **Simulati
 This project was developed based on ROS Melodic under Ubuntu 18.04, and the simulation environment was improved based on [@freeman-1995](https://github.com/freeman-1995) project [JCAR-Competition](https://github.com/freeman-1995/JCAR-Competition).
 Based on his project, the Kinova Jaco v3 robot arm model was replaced with the Kinova Jaco v2 model.
 
-![simulation1](https://github.com/Lygggggg/Upper-level-task-planning-of-Jaco-based-on-behavior-tree/tree/main/pic/152803.png)
+![simulation1](pic/152803.png)
 
 ### Environment
 
@@ -81,7 +83,7 @@ roslaunch robot_grasp START_Gazebo.launch
 ```sh
 roslaunch robot_grasp START_Moveit.launch
 ```
-![simulation2](https://github.com/Lygggggg/Upper-level-task-planning-of-Jaco-based-on-behavior-tree/tree/main/pic/2.png)
+![simulation2](pic/2.png)
 
 3. Load the object to be grabbed into the Gazebo simulation environment.
 ```sh
@@ -111,5 +113,8 @@ roslaunch behavior_tree_leaves new_tree_like_guyue.launch
 
 Simulation experiment video.
 
-[![Watch the video](https://github.com/Lygggggg/Upper-level-task-planning-of-Jaco-based-on-behavior-tree/tree/main/pic/164832.png)](https://www.youtube.com/watch?v=Scji1yu_w7I)
+[![Watch the video](pic/164832.png)](https://www.youtube.com/watch?v=Scji1yu_w7I)
 
+## Contributor
+
+This project exists thanks to all the people who contribute. 
